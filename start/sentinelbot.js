@@ -16,37 +16,18 @@ limitations under the License.
 
 This is a sample Slack bot built with Botkit.
 */
-
+require("dotenv").config();
 const { Botkit } = require('botkit')
 const { SlackAdapter, SlackEventMiddleware } = require(
   'botbuilder-adapter-slack')
-const { SecretManagerServiceClient } = require('@google-cloud/secret-manager')
 
 /**
- * Returns the secret string from Google Cloud Secret Manager
- * @param {string} name The name of the secret.
- * @return {string} The string value of the secret.
+ * Asynchronous function to initialize sentinelbot.
  */
-async function accessSecretVersion (name) {
-  const client = new SecretManagerServiceClient()
-  const projectId = process.env.PROJECT_ID
-  const [version] = await client.accessSecretVersion({
-    name: `projects/${projectId}/secrets/${name}/versions/1`
-  })
-
-  // Extract the payload as a string.
-  const payload = version.payload.data.toString('utf8')
-
-  return payload
-}
-
-/**
- * Asynchronous function to initialize kittenbot.
- */
-async function kittenbotInit () {
+async function sentinelbotInit () {
   const adapter = new SlackAdapter({
-    clientSigningSecret: await accessSecretVersion('client-signing-secret'),
-    botToken: await accessSecretVersion('bot-token')
+    clientSigningSecret: process.env.SIGNING_SECRET,
+    botToken: process.env.TOKEN
   })
 
   adapter.use(new SlackEventMiddleware())
@@ -64,4 +45,4 @@ async function kittenbotInit () {
   })
 }
 
-kittenbotInit()
+sentinelbotInit()
